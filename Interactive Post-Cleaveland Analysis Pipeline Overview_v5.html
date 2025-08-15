@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Guideline Post-Cleaveland Analysis Pipeline</title>
+    <style>
+        :root {
+            --input-color: #d4edda;
+            --output-color: #f8d7da;
+            --script-color: #fff3cd;
+            --intermediate-color: #cfe2ff;
+            --visualization-color: #e2d9f3;
+            --connection-color: #6c757d;
+            --highlight-color: #ffc107;
+            --cli-color: #f8f9fa;
+            --cli-border: #6c757d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #212529;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+
+        h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Quick Start Section */
+        .quick-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+
+        .quick-start h2 {
+            color: white;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-start h2::before {
+            content: "⚡";
+            font-size: 1.2em;
+        }
+
+        .quick-start-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .quick-start-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-start-card h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .quick-start-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .quick-start-card li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .quick-start-card li::before {
+            content: "✓";
+            color: #4CAF50;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Legend Styles */
+        .legend {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .legend-text {
+            flex-grow: 1;
+        }
+
+        .legend-text strong {
+            display: block;
+            margin-bottom: 3px;
+            color: #212529;
+        }
+
+        .legend-desc {
+            font-size: 0.85em;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        /* Pipeline Flow Diagram */
+        .pipeline-flow {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .pipeline-flow h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pipeline-flow h2::before {
+            content: "🔄";
+            font-size: 1.2em;
+        }
+
+        .flow-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .flow-step {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .flow-step-number {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+        }
+
+        .flow-step-title {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+
+        .flow-step-desc {
+            font-size: 0.8em;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        .flow-arrow {
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 1.5em;
+            z-index: 1;
+        }
+
+        .flow-step:last-child .flow-arrow {
+            display: none;
+        }
+
+        /* Responsive flow */
+        @media (max-width: 768px) {
+            .flow-container {
+                grid-template-columns: 1fr;
+            }
+            .flow-arrow {
+                display: none;
+            }
+            .flow-step::after {
+                content: "↓";
+                position: absolute;
+                bottom: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #6c757d;
+                font-size: 1.5em;
+                z-index: 1;
+            }
+            .flow-step:last-child::after {
+                display: none;
+            }
+        }
+
+        /* CLI Command Styles */
+        .cli-command {
+            background-color: var(--cli-color);
+            border: 1px solid var(--cli-border);
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .cli-command::before {
+            content: "$ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .cli-command .command-text {
+            color: #495057;
+            white-space: nowrap;
+        }
+
+        .cli-copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .cli-copy-btn:hover {
+            background: #0056b3;
+        }
+
+        .cli-copy-btn.copied {
+            background: #28a745;
+        }
+
+        .cli-example {
+            background-color: #e9ecef;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .cli-example-title {
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cli-example-title::before {
+            content: "💡";
+        }
+
+        /* Folder Structure with Color Coding */
+        .folder-structure {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.6;
+            border: 1px solid #dee2e6;
+        }
+
+        .folder-structure .scripts-folder {
+            color: #856404;
+            font-weight: bold;
+            background-color: var(--script-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .folder-structure .input-folder {
+            color: #155724;
+            font-weight: bold;
+            background-color: var(--input-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .folder-structure .output-folder {
+            color: #721c24;
+            font-weight: bold;
+            background-color: var(--output-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .folder-structure .intermediate-folder {
+            color: #004085;
+            font-weight: bold;
+            background-color: var(--intermediate-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .folder-structure .visualization-folder {
+            color: #3d1a78;
+            font-weight: bold;
+            background-color: var(--visualization-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .folder-structure .file-item {
+            color: #495057;
+            margin-left: 20px;
+            font-weight: normal;
+        }
+
+        .folder-structure .comment {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Pipeline Steps */
+        .pipeline {
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .step {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--script-color);
+            border-radius: 6px 6px 0 0;
+            border-left: 6px solid #ffc107;
+        }
+
+        .step-number {
+            background-color: #3498db;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .step-title-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            margin: 0 15px;
+        }
+        
+        .step-checkbox {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #212529;
+            font-size: 1.1em;
+        }
+
+        .step-script {
+            background-color: rgba(0,0,0,0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .details {
+            padding: 15px;
+        }
+
+        .details-section {
+            margin-bottom: 15px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+
+        .details-title {
+            font-weight: 600;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            transition: background-color 0.2s;
+        }
+
+        .details-title:hover {
+            background-color: #e9ecef;
+        }
+
+        .details-title:after {
+            content: "▼";
+            font-size: 0.8em;
+            transition: transform 0.2s;
+        }
+
+        .details-title.collapsed:after {
+            transform: rotate(-90deg);
+        }
+
+        .details-content {
+            padding: 15px;
+            max-height: 1000px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .details-content.hidden {
+            max-height: 0;
+            padding: 0 15px;
+            overflow: hidden;
+        }
+
+        .file-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .file-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+
+        .file-path {
+            font-family: 'Courier New', Courier, monospace;
+            padding: 3px 6px;
+            border-radius: 3px;
+            margin-right: 8px;
+            font-size: 0.9em;
+        }
+
+        .file-desc {
+            font-size: 0.9em;
+            color: #6c757d;
+            flex-grow: 1;
+        }
+
+        /* Color classes */
+        .input-file {
+            border-left: 4px solid #28a745;
+        }
+
+        .input-file .details-title {
+            background-color: var(--input-color);
+        }
+
+        .input-file .file-path {
+            background-color: var(--input-color);
+        }
+
+        .output-file {
+            border-left: 4px solid #dc3545;
+        }
+
+        .output-file .details-title {
+            background-color: var(--output-color);
+        }
+
+        .output-file .file-path {
+            background-color: var(--output-color);
+        }
+
+        .intermediate-file {
+            border-left: 4px solid #007bff;
+        }
+
+        .intermediate-file .details-title {
+            background-color: var(--intermediate-color);
+        }
+
+        .intermediate-file .file-path {
+            background-color: var(--intermediate-color);
+        }
+
+        .visualization-file {
+            border-left: 4px solid #6f42c1;
+        }
+
+        .visualization-file .details-title {
+            background-color: var(--visualization-color);
+        }
+
+        .visualization-file .file-path {
+            background-color: var(--visualization-color);
+        }
+
+        .cli-section {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .cli-section .details-title {
+            background-color: #d1ecf1;
+        }
+
+        /* Tab Styles */
+        .tab-container {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .tab-button:hover {
+            background-color: #e9ecef;
+        }
+
+        .tab-button.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 15px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Connection arrows */
+        .connection-arrow {
+            position: absolute;
+            height: 30px;
+            width: 2px;
+            background-color: var(--connection-color);
+            left: 50%;
+            margin-left: -1px;
+            z-index: 1;
+        }
+
+        .connection-arrow:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid var(--connection-color);
+        }
+
+        /* Highlight classes */
+        .highlight {
+            animation: highlight 1.5s ease;
+            box-shadow: 0 0 0 3px var(--highlight-color);
+        }
+
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(255,193,7,0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255,193,7,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,193,7,0); }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Parameter descriptions */
+        .param-desc {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .param-desc h4 {
+            margin-top: 0;
+            color: #495057;
+        }
+
+        .param-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .param-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .param-list li:last-child {
+            border-bottom: none;
+        }
+
+        .param-name {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .credits {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #495057;
+            border-top: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .credits a {
+            color: #0366d6;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .credits a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .step-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .step-title {
+                margin: 10px 0;
+            }
+            
+            .legend-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-start-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="credits">
+            Developed by <a href="https://github.com/deoliveiralf" target="_blank">Leandro F. de Oliveira</a><br> | <a href="http://araucaria.ib.usp.br:8383/#" target="_blank">miRNA modules viewer tool</a> | Year: 2025 | <a href="https://sites.usp.br/ligninlab/" target="_blank">LigninLab </a> | University of São Paulo
+        </div>
+        
+        <h1>Complete Guideline Post-Cleaveland Analysis Pipeline</h1>
+        
+        <!-- Pipeline Flow Diagram -->
+        <div class="pipeline-flow">
+            <h2>Pipeline Flow Overview</h2>
+            <div class="flow-container">
+                <div class="flow-step">
+                    <div class="flow-step-number">1-2</div>
+                    <div class="flow-step-title">Data Filtering & Extraction</div>
+                    <div class="flow-step-desc">Filter CleaveLand results and extract miRNA-target pairs</div>
+                    <div class="flow-arrow">→</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-step-number">3-4</div>
+                    <div class="flow-step-title">Region Analysis</div>
+                    <div class="flow-step-desc">Analyze cleavage sites and rename miRNA IDs</div>
+                    <div class="flow-arrow">→</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-step-number">5-7</div>
+                    <div class="flow-step-title">Annotation Enhancement</div>
+                    <div class="flow-step-desc">Add miRNA info and standardize naming</div>
+                    <div class="flow-arrow">→</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-step-number">8-10</div>
+                    <div class="flow-step-title">Expression Analysis</div>
+                    <div class="flow-step-desc">Generate heatmaps and correlation plots in R</div>
+                    <div class="flow-arrow">→</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-step-number">11-12</div>
+                    <div class="flow-step-title">Data Integration</div>
+                    <div class="flow-step-desc">Merge tables and perform module analysis</div>
+                    <div class="flow-arrow">→</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-step-number">13-14</div>
+                    <div class="flow-step-title">Final Visualization</div>
+                    <div class="flow-step-desc">Generate cleavage plots and combine results</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-start">
+            <h2>Quick Start Guide</h2>
+            <div class="quick-start-grid">
+                <div class="quick-start-card">
+                    <h3>Prerequisites</h3>
+                    <ul>
+                        <li>Python 3.7+</li>
+                        <li>Required packages: pandas, numpy, matplotlib, seaborn</li>
+                        <li>CleaveLand4 output files</li>
+                        <li>Genome annotation files (GFF3)</li>
+                        <li>R packages</li>
+                        <li>Transcripts expression values</li>
+                        <li>miRNAs expression values</li>
+                        <li>miRNAs identification files: fasta, list, names</li>
+                        <li>miRNAs EdgeR analysis</li>
+                    </ul>
+                </div>
+                <div class="quick-start-card">
+                    <h3>Essential Steps</h3>
+                    <ul>
+                        <li>Filter CleaveLand results and extract miRNA-target pairs (Steps 1 and 2)</li>
+                        <li>Analyze miRNAs slice sites (Steps 3, 4 and 13)</li>
+                        <li>R analyzes (Steps 8, 9 and 10)</li>
+                        <li>Add annotations (Steps 5, 6 and 7)</li>
+                        <li>Generate final reports [plots, tables, etc] (Steps 11, 12, and 14)</li>
+                    </ul>
+                </div>
+                <div class="quick-start-card">
+                    <h3>Optional Analysis</h3>
+                    <ul>
+                        <li>Genomic region analysis (Step 3)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h3>Pipeline Color Legend</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--script-color);"></div>
+                    <div class="legend-text">
+                        <strong>Script Files</strong>
+                        <div class="legend-desc">Python/bash scripts that process the data</div>
+                    </div>
+                </div> 
+               <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--input-color);"></div>
+                    <div class="legend-text">
+                        <strong>Input Files/Folders</strong>
+                        <div class="legend-desc">Original data files that scripts read from</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--output-color);"></div>
+                    <div class="legend-text">
+                        <strong>Output Files/Folders</strong>
+                        <div class="legend-desc">Results generated by each script</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--intermediate-color);"></div>
+                    <div class="legend-text">
+                        <strong>Intermediate Files</strong>
+                        <div class="legend-desc">Temporary outputs used between steps</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--visualization-color);"></div>
+                    <div class="legend-text">
+                        <strong>Visualization Files</strong>
+                        <div class="legend-desc">Plots, charts, and HTML reports</div>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #d1ecf1;"></div>
+                    <div class="legend-text">
+                        <strong>Command Line</strong>
+                        <div class="legend-desc">Usage examples and CLI parameters</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Folder Structure (by using create_dirs.sh)</h2>
+        <div class="folder-structure">
+.
+├── <span class="scripts-folder">A_scripts/</span>                                   <span class="comment"># Analysis scripts</span>
+├── <span class="input-folder">B_inputs/</span>                                    <span class="comment"># Input data files</span>
+│   ├── <span class="file-item">full_results.txt</span>                         <span class="comment"># Original CleaveLand output</span>
+│   ├── <span class="file-item">cleaveland_output.txt</span>                    <span class="comment"># CleaveLand results for annotation</span>
+│   ├── <span class="file-item">Renamed_miRNAs_final_fixed.fa</span>            <span class="comment"># miRNA FASTA file</span>
+│   ├── <span class="file-item">Sviridis_726_v4.1.gene.gff3</span>             <span class="comment"># Genome annotation</span>
+│   ├── <span class="file-item">Sviridis_726_v4.1.annotation_info.txt</span>   <span class="comment"># Gene annotations</span>
+│   ├── <span class="file-item">inventario_setaria_atualizado.txt</span>        <span class="comment"># Functional inventory</span>
+│   ├── <span class="file-item">mirnas_CPM.txt</span>                           <span class="comment"># miRNA expression data</span>
+│   └── <span class="file-item">transcripts_TPM.txt</span>                      <span class="comment"># Transcript expression data</span>
+│   ├── <span class="intermediate-folder">EdgeR_results/</span>                           <span class="comment"># Data, tables from EdgeR analysis</span>
+│   └── <span class="intermediate-folder">R_analysis/</span>                             <span class="comment"># Plots, heatmap, correlation, tables from R analysis</span>
+├── <span class="intermediate-folder">C_intermediate/</span>                             <span class="comment"># Intermediate processing files</span>
+│   ├── <span class="intermediate-folder">classification/</span>                         <span class="comment"># Genomic region classification</span>
+│   ├── <span class="intermediate-folder">filtered/</span>                              <span class="comment"># Filtered CleaveLand results</span>
+│   ├── <span class="intermediate-folder">function/</span>                              <span class="comment"># Functional annotation mapping</span>
+│   ├── <span class="intermediate-folder">mapping/</span>                               <span class="comment"># miRNA-target mapping</span>
+│   └── <span class="intermediate-folder">mirna_target/</span>                          <span class="comment"># miRNA-target pairs</span>
+├── <span class="output-folder">D_pdfs_logs/</span>                               <span class="comment"># PDF outputs</span>
+│   └── <span class="output-folder">logs/</span>                                       <span class="comment"># To save all generated log files</span>
+├── <span class="output-folder">E_annotation/</span>                             <span class="comment"># Annotation outputs</span>
+├── <span class="visualization-folder">F_module_heatmaps/</span>                        <span class="comment"># Module analysis visualizations</span>
+├── <span class="output-folder">G_final_report/</span>                           <span class="comment"># Final analysis reports</span>
+└── <span class="output-folder">H_README/</span>                                 <span class="comment"># Documentation</span>
+        </div>
+
+        <h2>Analysis Pipeline</h2>
+        <div class="pipeline">
+            <div class="pipeline-control-buttons">
+                <div style="margin: 20px 0; text-align: center;">
+                    <button onclick="toggleAllSteps(true)" style="padding: 5px 10px; margin: 0 5px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Check All Steps
+                    </button>
+                    <button onclick="toggleAllSteps(false)" style="padding: 5px 10px; margin: 0 5px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Uncheck All Steps
+                    </button>
+                </div>
+            </div>
+        
+            <!-- Step 1 -->
+            <div class="step" id="step1">
+                <div class="step" id="step1">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step1-checkbox">
+                        <div class="step-title">Filter CleaveLand Results and Extract PDFs</div>
+                    </div>
+                    <div class="step-script">01_filter-cleaveland-results.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/01_filter-cleaveland-results.py B_inputs/full_results.txt --pdf_dir D_pdfs_logs/TPlot.pdfs/ --output_dir C_intermediate/filtered/ --pdf_output_dir D_pdfs_logs/matched_pdfs/</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">input_file</span> - CleaveLand results file</li>
+                                    <li><span class="param-name">--pdf_dir</span> - Directory containing PDF files</li>
+                                    <li><span class="param-name">--output_dir</span> - Output directory for filtered results</li>
+                                    <li><span class="param-name">--mfe-threshold</span> - MFE ratio threshold (default: 0.7)</li>
+                                    <li><span class="param-name">--allen-threshold</span> - Allen score threshold (default: 3.0)</li>
+                                    <li><span class="param-name">--category</span> - Degradome category filter (default: 0,1,2)</li>
+                                    <li><span class="param-name">--pvalue</span> - P-value threshold (default: 0.05)</li>
+                                </ul>
+                            </div>
+                            <div class="cli-example">
+                                <div class="cli-example-title">Example with custom thresholds:</div>
+                                <div class="cli-command">
+                                    <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                    <span class="command-text">./A_scripts/01_filter-cleaveland-results.py B_inputs/full_results.txt --pdf_dir D_pdfs_logs/TPlot.pdfs/ --output_dir C_intermediate/filtered/ --pdf_output_dir D_pdfs_logs/matched_pdfs/ --min-mfe-ratio 0.7 --max-allen-score 5 --max-pvalue 0.05 --category 0 1 2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">B_inputs/full_results.txt</span>
+                                    <span class="file-desc">Original CleaveLand output with all results</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">D_pdfs_logs/TPlot.pdfs/</span>
+                                    <span class="file-desc">Directory containing all PDF T-plot files</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="filtered_cleaveland_results">C_intermediate/filtered/filtered_cleaveland_results.txt</span>
+                                    <span class="file-desc">Filtered results meeting threshold criteria</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="extracted_ids">C_intermediate/filtered/extracted_ids.txt</span>
+                                    <span class="file-desc">List of miRNA-target pair IDs from filtered results</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="matched_pdfs">D_pdfs_logs/matched_pdfs</span>
+                                    <span class="file-desc">A folder containing the extracted pdfs</span>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script filters CleaveLand results based on multiple criteria and extracts corresponding visualization files.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Parse CleaveLand output and apply filtering criteria</li>
+                                <li>Extract SiteID values from filtered results</li>
+                                <li>Copy matching PDF files to output directory</li>
+                                <li>Generate summary statistics of filtering results</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Step 2 -->
+            <div class="step" id="step2">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step2-checkbox">
+                    <div class="step-title">Extract miRNA-Target Pairs</div>
+                    </div>
+                    <div class="step-script">02_mirna-target-modules.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/02_mirna-target-modules.py C_intermediate/filtered/filtered_cleaveland_results.txt &gt; C_intermediate/mirna_target/mirna-target-modules-table.txt</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">input_file</span> - Filtered CleaveLand results file</li>
+                                    <li><span class="param-name">--min-category</span> - Minimum degradome category (default: 0)</li>
+                                    <li><span class="param-name">--min-score</span> - Minimum alignment score (default: 0)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">C_intermediate/filtered/filtered_cleaveland_results.txt</span>
+                                    <span class="file-desc">Filtered CleaveLand results from Step 1</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="mirna-target-modules-table">C_intermediate/mirna_target/mirna-target-modules-table.txt</span>
+                                    <span class="file-desc">Tab-separated table of miRNA-target pairs</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script extracts miRNA-target pairs from the filtered CleaveLand results by parsing T-Plot file names.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Parse T-Plot file paths from CleaveLand output</li>
+                                <li>Extract miRNA and target IDs from filenames</li>
+                                <li>Generate tab-separated output table</li>
+                                <li>Apply optional filters based on degradome category and score</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 with checkbox -->
+            <div class="step" id="step3">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step3-checkbox">
+                        <div class="step-title">Analyze miRNA Sites (5'UTR/CDS/3'UTR)</div>
+                    </div>
+                    <div class="step-script">03_annotate_and_plot_cleavage_regions.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/03_annotate_and_plot_cleavage_regions.py B_inputs/cleaveland_output.txt C_intermediate/mirna_target/mirna-target-modules-table.txt B_inputs/Sviridis_726_v4.1.gene.gff3 C_intermediate/classification/filtered_annotated_cleavages.csv/</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">cleaveland_results</span> - CleaveLand output file</li>
+                                    <li><span class="param-name">mirna-target-table</span> - miRNA-target pairs table</li>
+                                    <li><span class="param-name">annotation_gff3</span> - Genome annotation in GFF3 format</li>
+                                    <li><span class="param-name">mirna_analysis_results.csv/</span> - Main output file for results</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">B_inputs/cleaveland_output.txt</span>
+                                    <span class="file-desc">CleaveLand output file</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">C_intermediate/mirna_target/mirna-target-modules-table.txt</span>
+                                    <span class="file-desc">miRNA-target pairs table from Step 2</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/Sviridis_726_v4.1.gene.gff3</span>
+                                    <span class="file-desc">Genome annotation in GFF3 format</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="filtered_annotated_cleavages">C_intermediate/classification/filtered_annotated_cleavages.csv</span>
+                                    <span class="file-desc">Annotated cleavage sites with genomic regions</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="slice_region_distribution_summary">C_intermediate/classification/slice_region_distribution_summary.csv</span>
+                                    <span class="file-desc">Summary statistics of region distribution</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="slice_site_distribution_bar">C_intermediate/classification/slice_site_distribution_bar.png</span>
+                                    <span class="file-desc">Bar plot of cleavage site distribution</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="slice_site_distribution_pie">C_intermediate/classification/slice_site_distribution_pie.png</span>
+                                    <span class="file-desc">Pie chart of cleavage site distribution</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script analyzes the genomic regions (5'UTR, CDS, 3'UTR) where miRNA cleavage sites are located and generates visualizations of their distribution.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Parse GFF3 annotation to map genomic features</li>
+                                <li>Classify cleavage sites by transcript region</li>
+                                <li>Generate summary statistics of region distribution</li>
+                                <li>Create bar and pie charts visualizing the distribution</li>
+                                <li>Handle edge cases where sites fall outside annotated regions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step" id="step4">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step4-checkbox">
+                    <div class="step-title">Rename miRNA IDs in Annotated Cleavages</div>
+                    </div>
+                    <div class="step-script">04_rename_filtered_annotated_cleavages.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/04_rename_filtered_annotated_cleavages.py --table C_intermediate/
+classification/filtered_annotated_cleavages.csv --fasta B_inputs/Renamed_miRNAs_final_fixed.fa --output C_intermediate/classification/renamed_filtered_annotated_cleavages.csv</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">--table input_table</span> - Annotated cleavage sites CSV file</li>
+                                    <li><span class="param-name">--fasta reference_fasta</span> - FASTA file with miRNA names</li>
+                                    <li><span class="param-name">--output</span> - Output file path</li>
+                                    <li><span class="param-name">--id-col</span> - Column containing miRNA IDs (default: 1)</li>
+                                    <li><span class="param-name">--keep-original</span> - Keep original IDs in new column</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">C_intermediate/classification/filtered_annotated_cleavages.csv</span>
+                                    <span class="file-desc">Annotated cleavage sites from Step 3</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/Renamed_miRNAs_final_fixed.fa</span>
+                                    <span class="file-desc">FASTA file with standardized miRNA names</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="renamed_filtered_annotated_cleavages">C_intermediate/classification/renamed_filtered_annotated_cleavages.csv</span>
+                                    <span class="file-desc">Cleavage sites table with standardized miRNA names</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script standardizes miRNA names in the cleavage sites table by mapping them to names from a reference FASTA file.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Parse FASTA headers to extract miRNA name mappings</li>
+                                <li>Replace miRNA IDs in the table with standardized names</li>
+                                <li>Handle cases where IDs don't match the reference</li>
+                                <li>Optionally preserve original IDs in a separate column</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Step 5 -->
+            <div class="step" id="step5">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step5-checkbox">
+                    <div class="step-title">Add miRNA Info from FASTA</div>
+                    </div>
+                    <div class="step-script">05_miRNA_mapping_script.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/05_miRNA_mapping_script.py B_inputs/Renamed_miRNAs_final_fixed.fa C_intermediate/mirna_target/mirna-target-modules-table.txt > C_intermediate/mapping/mirna_target_info.txt</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">fasta_file</span> - miRNA reference FASTA file</li>
+                                    <li><span class="param-name">mirna_table</span> - miRNA-target pairs table</li>
+                                    <li><span class="param-name">></span> - Output file path</li>
+                                    <li><span class="param-name">--add-sequences</span> - Include miRNA sequences in output</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">B_inputs/Renamed_miRNAs_final_fixed.fa</span>
+                                    <span class="file-desc">FASTA file with standardized miRNA names</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">C_intermediate/mirna_target/mirna-target-modules-table.txt</span>
+                                    <span class="file-desc">miRNA-target pairs from Step 2</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="mirna_target_info">C_intermediate/mapping/mirna_target_info.txt</span>
+                                    <span class="file-desc">Enriched miRNA-target information table</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script enhances the miRNA-target table by adding miRNA information from the FASTA file headers.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Parse FASTA headers to extract miRNA details</li>
+                                <li>Map miRNA IDs to their full names and types</li>
+                                <li>Generate an enriched output table with additional columns</li>
+                                <li>Optionally include miRNA sequences in the output</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="step" id="step6">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step6-checkbox">
+                    <div class="step-title">Rename miRNAs IDs in the CPM table</div>
+                    </div>
+                    <div class="step-script">06_rename_mirnas_CPM_table.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/06_rename_mirnas_CPM_table.py B_inputs/Renamed_miRNAs_final_fixed.fa B_inputs/normalized_mirnas_counts_CPM_3_samples_EdgeR.txt -o B_inputs/renamed_normalized_mirnas_counts_CPM_3_samples_EdgeR.txt</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">mirna_file.fa</span> - miRNA-fasta with renamed IDs</li>
+                                    <li><span class="param-name">counts_CPM</span> - table with the normalized counts in CPM from EdgeR</li>
+                                    <li><span class="param-name">-o, --output</span> - Output file path</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">B_inputs/Renamed_miRNAs_final_fixed.fa</span>
+                                    <span class="file-desc">FASTA file with standardized miRNA names</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/normalized_mirnas_counts_CPM_3_samples_EdgeR.txt</span>
+                                    <span class="file-desc">Table with normalized CPM from EdgeR</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="renamed_cpm_table.txt">B_inputs/renamed_cpm_table.txt</span>
+                                    <span class="file-desc">A new CPM table with renamed IDs for a ready identification</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script renames the miRNAs by adding the new names from fasta file to the original IDs.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Match non-renamed miRNAs to renamed miRNAs in the fasta file</li>
+                                <li>Generate a new CPM table with renamed miRNAs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 -->
+             <div class="step" id="step7">
+                <div class="step-header">
+                    <div class="step-number">7</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step7-checkbox">
+                    <div class="step-title">Rename miRNAs modules table</div>
+                    </div>
+                    <div class="step-script">07_rename_mirna_modules_table.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/07_rename_mirna_modules_table.py C_intermediate/mirna_target/mirna-target-modules-table.txt B_inputs/Renamed_miRNAs_final_fixed.fa -o C_intermediate/mirna_target/renamed_mirna_target_modules_table.tx</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">mirna_target_modules_table.txt</span> - Table containing the modules</li>
+                                    <li><span class="param-name">Renamed_miRNAs_final_fixed.fa</span> - A fasta file with the renamed miRNAs</li>
+                                    <li><span class="param-name">-o, --output</span> - Output file path</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">C_intermediate/mirna_target/mirna_target_modules_table.txt</span>
+                                    <span class="file-desc">Table containing the modules from Step 2</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/Renamed_miRNAs_final_fixed.fa</span>
+                                    <span class="file-desc">FASTA file with standardized miRNA names</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="renamed_mirna_target_modules_table.txt">C_intermediate/mirna_target/renamed_mirna_target_modules_table.txt</span>
+                                    <span class="file-desc">A new module table with renamed IDs for a ready identification</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script renames the miRNAs by adding the new names from fasta file to the original IDs.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Match non-renamed miRNAs to renamed miRNAs in the fasta file</li>
+                                <li>Generate a new module table with renamed miRNAs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8 -->
+            <div class="step" id="step8">
+                <div class="step-header">
+                    <div class="step-number">8</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step8-checkbox">
+                    <div class="step-title">Generate heatmaps for each miRNA [Run in R]</div>
+                    </div>
+                    <div class="step-script">08_mirna_heatmap.R</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">Run the script in R</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">renamed_normalized_counts_CPM.txt</span> - A table containing expression values</li>
+                                    <li><span class="param-name">DE_results_*_.txt</span> - Tables with Differential Expressions from EdgeR analysis</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">renamed_normalized_counts_CPM.txt</span>
+                                    <span class="file-desc">This file should be in the same directory</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">DE_results_*_.txt</span>
+                                    <span class="file-desc">Data from Edger analysis. Put in the same directory</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="Individual_miRNA_LogFC_Heatmaps">~/Individual_miRNA_LogFC_Heatmaps</span>
+                                    <span class="file-desc">A folder containing the individual LogFC Heatmaps</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="Individual_miRNA_Heatmaps_Enhanced">~/Individual_miRNA_Heatmaps_Enhanced</span>
+                                    <span class="file-desc">A folder containing the individual expression Heatmaps by replicates</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script generate indivual plots for each miRNA in both LogFC and Replicates-values Heatmaps.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Take the expression CPM values of miRNAs</li>
+                                <li>Generate heatmap plots for individual miRNAs</li>
+                                <li>Two kind of plots: LogFC and expression by replicate</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="step" id="step9">
+                <div class="step-header">
+                    <div class="step-number">9</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step9-checkbox">
+                    <div class="step-title">Generate heatmaps for each Target [Run in R]</div>
+                    </div>
+                    <div class="step-script">09_target_heatmap.R</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">Run the script in R</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">transcripts_TPM.txt</span> - A table containing target expression values</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">transcripts_TPM.txt</span>
+                                    <span class="file-desc">This file should be in the same directory</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="Target_Gene_Heatmaps_by_miRNA">~/Target_Gene_Heatmaps_by_miRNA</span>
+                                    <span class="file-desc">A folder containing the individual LogFC Heatmaps</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="Target_Gene_LogFC_Heatmaps_by_miRNA">~/Target_Gene_LogFC_Heatmaps_by_miRNA</span>
+                                    <span class="file-desc">A folder containing the individual expression Heatmaps by replicates</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script generate indivual plots of Target from each modules, in both LogFC and Replicates-values Heatmaps.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Take the expression TPM values from the targets</li>
+                                <li>Generate heatmap plots for individual Targets modules</li>
+                                <li>Two kind of plots: LogFC and expression by replicate</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 10 -->
+            <div class="step" id="step10">
+                <div class="step-header">
+                    <div class="step-number">10</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step10-checkbox">
+                    <div class="step-title">Generate correlation plots between individual miRNAs and targets [Run in R]</div>
+                    </div>
+                    <div class="step-script">10_mirna_correlation.r</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">Run the script in R</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">renamed_mirna_target_modules_table.txt</span> - A table containing modules</li>
+                                    <li><span class="param-name">transcripts_TPM.txt</span> - A table containing target expression values</li>
+                                    <li><span class="param-name">renamed_mirnas_CPM.txt</span> - A table containing miRNAs expression values</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">renamed_mirna_target_modules_table.txt</span>
+                                    <span class="file-desc">Output from the rename_mirna_modules_table.py. This file should be in the same directory</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">transcripts_TPM.txt</span>
+                                    <span class="file-desc">This file should be in the same directory</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">renamed_mirnas_CPM.txt</span>
+                                    <span class="file-desc">Output from the rename_mirnas_CPM_table.py. This file should be in the same directory</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="Plots">~/plots</span>
+                                    <span class="file-desc">A folder containing the individual correlation plots</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="Tables">~/tables</span>
+                                    <span class="file-desc">A folder containing the individual tables</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script generate indivual plots of correlation between miRNAs and targes, as well estatistical info.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Take the expression TPM values from the targets</li>
+                                <li>Take the expression CPM values from the miRNAs</li>
+                                <li>Generate correlation plots based on module list</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Step 11 -->
+            <div class="step" id="step11">
+                <div class="step-header">
+                    <div class="step-number">11</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step11-checkbox">
+                    <div class="step-title">Merge All Tables for Final Report</div>
+                    </div>
+                    <div class="step-script">11_merge_tables.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/11_merge_tables.py C_intermediate/mapping/mirna_target_info.txt B_inputs/inventario_setaria_atualizado.txt B_inputs/Sviridis_726_v4.1.annotation_info.txt --cpm-filter B_inputs/renamed_normalized_mirnas_counts_CPM_1_sample.txt --target-column "miRNA_Chr ID" --output-prefix G_final_report/modules_table_final_1_sample --format html tsv json</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">mirna_table</span> - miRNA-target information</li>
+                                    <li><span class="param-name">function_table</span> - Functional inventory</li>
+                                    <li><span class="param-name">annotation_table</span> - Gene annotations</li>
+                                    <li><span class="param-name">--output-prefix</span> - Prefix for output files</li>
+                                    <li><span class="param-name">--format</span> - Output formats (html, tsv, json)</li>
+                                    <li><span class="param-name">--strip-versions</span> - Remove version numbers from gene IDs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">C_intermediate/mapping/mirna_target_info.txt</span>
+                                    <span class="file-desc">miRNA-target information from Step 5</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/inventario_setaria_atualizado.txt</span>
+                                    <span class="file-desc">Functional inventory data</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/Sviridis_726_v4.1.annotation_info.txt</span>
+                                    <span class="file-desc">Gene annotation information</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="modules_table_final_&lt;id&gt;">G_final_report/modules_table_final_&lt;id&gt;.html</span>
+                                    <span class="file-desc">Interactive HTML report</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="modules_table_final_&lt;id&gt;">G_final_report/modules_table_final_&lt;id&gt;.tsv</span>
+                                    <span class="file-desc">Tab-separated data file</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="modules_table_final_&lt;id&gt;">G_final_report/modules_table_final_&lt;id&gt;.json</span>
+                                    <span class="file-desc">JSON format data</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="miRNA_analysis">G_final_report/logs/miRNA_analysis.log</span>
+                                    <span class="file-desc">Processing log file</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script merges all the intermediate tables into a comprehensive final report with multiple output formats. The HTML table will be used as input in the web tool platform</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Merge miRNA-target, function, and annotation data</li>
+                                <li>Handle version numbers in gene IDs</li>
+                                <li>Generate interactive HTML report with filtering capabilities</li>
+                                <li>Create TSV and JSON outputs for further analysis</li>
+                                <li>Remove redundant rows from the final output</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 12 -->
+            <div class="step" id="step12">
+                <div class="step-header">
+                    <div class="step-number">12</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step12-checkbox">
+                    <div class="step-title">Module Heatmap/Correlation Analysis</div>
+                    </div>
+                    <div class="step-script">12_interactive_mirna_module_analysis.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/12_interactive_mirna_module_analysis.py C_intermediate/mapping/mirna_target_info.txt B_inputs/renamed_normalized_mirnas_counts_CPM_3_samples_EdgeR.txt B_inputs/transcripts_TPM.txt --cleavage-sites C_intermediate/classification/renamed_filtered_annotated_cleavages.csv --output-dir F_module_heatmaps/module_3_samples</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">mirna_target_info.txt</span> - miRNA-target information</li>
+                                    <li><span class="param-name">renamed_normalized_mirnas_counts_CPM</span> - miRNA expression data (CPM)</li>
+                                    <li><span class="param-name">transcripts_TPM</span> - Transcript expression data (TPM)</li>
+                                    <li><span class="param-name">renamed_filtered_annotated_cleavages</span> - Cleavage site information</li>
+                                    <li><span class="param-name">--output-dir ~/modules</span> - Output directory</li>
+                                    <li><span class="param-name">--min-correlation</span> - Minimum correlation threshold (default: 0.5)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">C_intermediate/mapping/mirna_target_info.txt</span>
+                                    <span class="file-desc">miRNA-target information from Step 5</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/mirnas_CPM.txt</span>
+                                    <span class="file-desc">miRNA expression data (Counts Per Million)</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/transcripts_TPM.txt</span>
+                                    <span class="file-desc">Transcript expression data (Transcripts Per Million)</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">C_intermediate/classification/renamed_filtered_annotated_cleavages.csv</span>
+                                    <span class="file-desc">Cleavage site information from Step 3</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <div class="tab-container">
+                                <div class="tab-buttons">
+                                    <button class="tab-button active" onclick="openTab(event, &#39;heatmap-files&#39;)">Heatmap Files</button>
+                                    <button class="tab-button" onclick="openTab(event, &#39;summary-files&#39;)">Summary Files</button>
+                                    <button class="tab-button" onclick="openTab(event, &#39;data-files&#39;)">Data Files</button>
+                                </div>
+                                
+                                <div id="heatmap-files" class="tab-content active">
+                                    <ul class="file-list">
+                                        <li>
+                                            <span class="file-path" data-file="*">F_module_heatmaps/*.png</span>
+                                            <span class="file-desc">Individual module analysis plots</span>
+                                        </li>
+                                        <li>
+                                            <span class="file-path" data-file="top_*_modules_summary">F_module_heatmaps/top_*_modules_summary.png</span>
+                                            <span class="file-desc">Summary plots of top modules</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div id="summary-files" class="tab-content">
+                                    <ul class="file-list">
+                                        <li>
+                                            <span class="file-path" data-file="top_*_modules">F_module_heatmaps/top_*_modules.csv</span>
+                                            <span class="file-desc">Top modules by correlation</span>
+                                        </li>
+                                        <li>
+                                            <span class="file-path" data-file="top_*_negative_modules">F_module_heatmaps/top_*_negative_modules.csv</span>
+                                            <span class="file-desc">Top modules with negative correlations</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div id="data-files" class="tab-content">
+                                    <ul class="file-list">
+                                        <li>
+                                            <span class="file-path" data-file="*_expression_table">F_module_heatmaps/*_expression_table.csv</span>
+                                            <span class="file-desc">Expression tables for each module</span>
+                                        </li>
+                                        <li>
+                                            <span class="file-path" data-file="*_correlation_table">F_module_heatmaps/*_correlation_table.csv</span>
+                                            <span class="file-desc">Correlation tables for each module</span>
+                                        </li>
+                                        <li>
+                                            <span class="file-path" data-file="*_cleavage_sites">F_module_heatmaps/*_cleavage_sites.csv</span>
+                                            <span class="file-desc">Cleavage site tables for each module</span>
+                                        </li>
+                                        <li>
+                                            <span class="file-path" data-file="mirna_module_analysis">F_module_heatmaps/mirna_module_analysis.log</span>
+                                            <span class="file-desc">Processing log</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This comprehensive script performs detailed analysis of miRNA modules including expression correlations and visualization.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Calculate log2 fold changes between sample groups</li>
+                                <li>Compute Pearson correlations between miRNAs and targets</li>
+                                <li>Generate heatmaps of expression and correlation data</li>
+                                <li>Create scatter plots of miRNA vs target expression</li>
+                                <li>Identify top modules by correlation strength</li>
+                                <li>Generate comprehensive output tables for each module</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 13 -->
+            <div class="step" id="step13">
+                <div class="step-header">
+                    <div class="step-number">13</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step13-checkbox">
+                    <div class="step-title">Plot Cleavage Sites for Each Module</div>
+                    </div>
+                    <div class="step-script">13_plot_cleavage_sites.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/13_plot_cleavage_sites.py -f C_intermediate/classification/filtered_annotated_cleavages.csv -r C_intermediate/classification/renamed_filtered_annotated_cleavages.csv -c B_inputs/cleaveland_output.txt -o F_module_heatmaps/Cleavage_plots/</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">-f, --filtered</span> - Input filtered_annotated_cleavages.csv file</li>
+                                    <li><span class="param-name">-r, --renamed</span> - Input renamed_filtered_annotated_cleavages.csv file (optional)</li>
+                                    <li><span class="param-name">-c, --cleaveland</span> - Input cleaveland_output.txt file</li>
+                                    <li><span class="param-name">-o, --output</span> - Output directory for PNG files</li>
+                                    <li><span class="param-name">-v, --verbose</span> - Enable verbose debug logging</li>
+                                </ul>
+                            </div>
+                            <div class="cli-example">
+                                <div class="cli-example-title">Example with verbose logging:</div>
+                                <div class="cli-command">
+                                    <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                    <span class="command-text">./A_scripts/13_plot_cleavage_sites.py -f C_intermediate/classification/filtered_annotated_cleavages.csv -c B_inputs/cleaveland_output.txt -o F_module_heatmaps/Cleavage_plots/ -v</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">C_intermediate/classification/filtered_annotated_cleavages.csv</span>
+                                    <span class="file-desc">Annotated cleavage sites from Step 3</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">C_intermediate/classification/renamed_filtered_annotated_cleavages.csv</span>
+                                    <span class="file-desc">Renamed cleavage sites from Step 4 (optional)</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">B_inputs/cleaveland_output.txt</span>
+                                    <span class="file-desc">Original CleaveLand output with alignment details</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="*">F_module_heatmaps/Cleavage_plots/*.png</span>
+                                    <span class="file-desc">Individual PNG plots for each miRNA-target pair</span>
+                                </li>
+                                <li>
+                                    <span class="file-path" data-file="cleavage_plots">F_module_heatmaps/Cleavage_plots/cleavage_plots.log</span>
+                                    <span class="file-desc">Detailed processing log file</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script generates clean, publication-quality PNG plots showing miRNA cleavage sites on target transcripts with genomic region annotations.</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Parses CleaveLand output to extract precise alignment positions</li>
+                                <li>Maps miRNA names between different naming conventions</li>
+                                <li>Generates standardized plots showing transcript regions (5'UTR, CDS, 3'UTR)</li>
+                                <li>Marks cleavage sites with precise nucleotide positions</li>
+                                <li>Handles edge cases and naming inconsistencies</li>
+                                <li>Produces comprehensive logging for troubleshooting</li>
+                            </ul>
+                            <p><strong>Plot Features:</strong></p>
+                            <ul>
+                                <li>Color-coded transcript regions (blue for CDS, orange for 3'UTR, green for 5'UTR)</li>
+                                <li>Clear labeling of miRNA and target transcript names</li>
+                                <li>Precise marking of cleavage site with red indicator</li>
+                                <li>Nucleotide positions for start, end, and cleavage points</li>
+                                <li>Clean, white background suitable for publications</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+	</div>
+
+            <!-- Step 14 -->
+            <div class="step" id="step14">
+                <div class="step-header">
+                    <div class="step-number">14</div>
+                    <div class="step-title-container">
+                        <input type="checkbox" class="step-checkbox" id="step14-checkbox">
+                    <div class="step-title">Plots combiner</div>
+                    </div>
+                    <div class="step-script">14_mirna_plot_combiner.py</div>
+                </div>
+                <div class="details">
+                    <div class="details-section cli-section">
+                        <div class="details-title">Command Line Usage</div>
+                        <div class="details-content">
+                            <div class="cli-command">
+                                <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                <span class="command-text">./A_scripts/14_mirna_plot_combiner.py C_intermediate/mirna_target/renamed_mirna_target_modules_table.txt B_inputs/R_analysis/mirna_and_target_plots_3_samples_EdgeR/Individual_miRNA_LogFC_Heatmaps/ B_inputs/R_analysis/mirna_and_target_plots_3_samples_EdgeR/Target_Gene_LogFC_Heatmaps_by_miRNA/ B_inputs/R_analysis/mirna_correlation_3_samples_EdgeR/plots/ -o F_module_heatmaps/combined_plots</span>
+                            </div>
+                            <div class="param-desc">
+                                <h4>Parameters:</h4>
+                                <ul class="param-list">
+                                    <li><span class="param-name">mirna_targets.txt</span> - Tab-separated file with miRNA ID and Target ID columns</li>
+                                    <li><span class="param-name">mirna_heatmap/</span> - Directory containing miRNA heatmap PNG files, from the Step [R]</li>
+                                    <li><span class="param-name">targets_heatmap/</span> - Directory containing targets heatmap PNG files, from the Step [R]</li>
+                                    <li><span class="param-name">correlation/</span> - Directory containing correlation plot PNG files, from the Step [R]</li>
+                                    <li><span class="param-name">-o results/</span> - (Optional) Output directory for combined plots</li>
+                                    <li><span class="param-name">--figsize 18 6</span> - (Optional) Figure size in inches (width height)</li>
+                                </ul>
+                            </div>
+
+                            <div class="cli-example">
+                                <div class="cli-example-title">Example with custom thresholds:</div>
+                                <div class="cli-command">
+                                    <button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                    <span class="command-text">./A_scripts/14_mirna_plot_combiner.py mirna_targets.txt mirna_heatmap/ targets_heatmap/ correlation/ -o results/</span>
+                               <div class="cli-command">
+<button class="cli-copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                                    <span class="command-text">./A_scripts/14_mirna_plot_combiner.py mirna_targets.txt mirna_heatmap/ targets_heatmap/ correlation/ --figsize 18 6</span>
+                               </div>  
+                               </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="details-section input-file">
+                        <div class="details-title">Inputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path">C_intermediate/mapping/mirna_target_info.txt</span>
+                                    <span class="file-desc">miRNA-target information from Step 5</span>
+                                </li>
+                                <li>
+                                    <span class="file-path">F_module_heatmaps/mirna_and_target_plots/Individual_miRNA_LogFC_Heatmaps/</span>
+                                    <span class="file-desc">Directory containing miRNA heatmap PNG files from Step 8</span>
+                                </li>
+                                    <span class="file-path">F_module_heatmaps/mirna_and_target_plots/Target_Gene_LogFC_Heatmaps_by_miRNA/</span>
+                                    <span class="file-desc">Directory containing targets heatmap PNG files from Step 9</span>
+                                </li>
+                                    <span class="file-path">F_module_heatmaps/mirna_correlation/plots/</span>
+                                    <span class="file-desc">Directory containing correlation plot PNG files from Step 10</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section output-file">
+                        <div class="details-title">Outputs</div>
+                        <div class="details-content">
+                            <ul class="file-list">
+                                <li>
+                                    <span class="file-path" data-file="*_combined_analysis.png;">F_module_heatmaps/combine_plots_*_</span>
+                                    <span class="file-desc">Individual combined plots for each module</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="details-section script-info">
+                        <div class="details-title">Script Description</div>
+                        <div class="details-content">
+                            <p>This script merges correlation plots, heatmaps of miRNAs and targets, for each identified module. These plots will be used as input in the web tool platform</p>
+                            <p><strong>Key functions:</strong></p>
+                            <ul>
+                                <li>Take the modules list</li>
+                                <li>Combine plot results from expression and correlation analysis</li>
+                                <li>Generate individual figures in PNG format containing plots</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        <div class="credits">
+            Developed by <a href="https://github.com/deoliveiralf" target="_blank">Leandro F. de Oliveira</a> | <a href="http://araucaria.ib.usp.br:8383/" target="_blank">miRNA modules viewer tool</a> | Year: 2025 | <a href="https://sites.usp.br/ligninlab/" target="_blank">LigninLab </a> | University of São Paulo
+        </div>
+    </div>
+
+    <script>
+        // Toggle details sections
+        document.querySelectorAll('.details-title').forEach(title => {
+            title.addEventListener('click', () => {
+                title.classList.toggle('collapsed');
+                const content = title.nextElementSibling;
+                content.classList.toggle('hidden');
+            });
+        });
+
+        // Tab functionality
+        function openTab(evt, tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        // Copy command to clipboard
+        function copyToClipboard(button) {
+            const command = button.parentElement.querySelector('.command-text').textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                button.classList.add('copied');
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        // Add checkbox persistence using localStorage
+        document.querySelectorAll('.step-checkbox').forEach(checkbox => {
+            // Load saved state
+            const stepId = checkbox.id.replace('-checkbox', '');
+            const isChecked = localStorage.getItem(stepId) === 'true';
+            checkbox.checked = isChecked;
+            
+            // Save state when changed
+            checkbox.addEventListener('change', function() {
+                localStorage.setItem(stepId, this.checked);
+            });
+        });
+
+        // Function to check/uncheck all boxes
+        function toggleAllSteps(checked) {
+            document.querySelectorAll('.step-checkbox').forEach(checkbox => {
+                checkbox.checked = checked;
+                const stepId = checkbox.id.replace('-checkbox', '');
+                localStorage.setItem(stepId, checked);
+            });
+        }
+    </script>
+</body>
+</html>
